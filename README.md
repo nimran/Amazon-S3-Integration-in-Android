@@ -46,13 +46,7 @@ Following are covered in this repo/tutorial/example
    * Select `Attach Policy`, then find `AmazonS3FullAccess` and attach it it to the role.
    * Note:  This will grant users in the identity pool full access to all buckets and operations in S3.  In a real app, you should restrict users to only have          access to the resources they need.
    
-    Click on IAM from the services
-
-    Click on Roles from the side menu
-
-    You will find the two roles which you created in step(2)
-
-    Click your Identity pool name for unauthenticated users (it will have “unauth” appended to your Identity Pool name).
+  
 
     ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-1.png)
 
@@ -71,9 +65,9 @@ Following are covered in this repo/tutorial/example
     a) Get the AWS Mobile SDK for Android
     	
         dependencies {
-        	compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
-            compile 'com.amazonaws:aws-android-sdk-cognito:2.2.+'
-            compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.2.+'
+        	implementation 'com.amazonaws:aws-android-sdk-s3:2.18.0'
+            implementation 'com.amazonaws:aws-android-sdk-cognito:2.18.0'
+            implementation 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.18.0'
     	}
 
     b) set the necessary manifest permissons like Internet
@@ -104,7 +98,7 @@ Following are covered in this repo/tutorial/example
      	
         object AWSKeys {
             internal const val COGNITO_POOL_ID = "YOUR COGNITO POOL ID"
-            internal val MY_REGION = Regions.AP_SOUTHEAST_1 // WHAT EVER REGION IT MAY BE, 			PLEASE CHOOSE EXACT
+            internal val MY_REGION = Regions.AP_SOUTHEAST_1 // WHAT EVER REGION IT MAY BE,PLEASE CHOOSE EXACT
             const val BUCKET_NAME = "YOUR BUCKET"
           }
         
