@@ -41,6 +41,11 @@ Following are covered in this repo/tutorial/example
 
 3) **Configure IAM role**
 
+   * Go to [Amazon IAM Console](https://console.aws.amazon.com/iam/home) and select "Roles".
+   * Select the `unauth` role you just created in step 1, which is of the form `Cognito_<IdentityPoolName>Unauth_Role`.
+   * Select `Attach Policy`, then find `AmazonS3FullAccess` and attach it it to the role.
+   * Note:  This will grant users in the identity pool full access to all buckets and operations in S3.  In a real app, you should restrict users to only have          access to the resources they need.
+   
     Click on IAM from the services
 
     Click on Roles from the side menu
@@ -52,24 +57,11 @@ Following are covered in this repo/tutorial/example
     ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-1.png)
 
 
-    After you selected UnAuthRole, Click on Permissions and create Inline Policy .
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-2.png)
+    After you selected UnAuthRole, Click on Attach policy and find AmazonS3FullAccess and attach it
+    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/IAM_Management_Console-2.png)
+    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/IAM_Management_Console-3.png)
 
-    Click on Select to set the policies
-
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-3.png)
-
-    On the Edit Permissions page, select Amazon S3 as AWS Service, select All Actions(*) for Actions and enter the arn:aws:s3:::your_bucket_name/* as Amazon Resource Name (ARN).
-
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-4.png)
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-5.png)
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-6.png)
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-7.png)
-    ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/iam-8.png)
-
-
-    **CLICK ON TRUST RELATIONSHIPS AND NOTE DOWN YOUR COGNITO POOL ID**
-    ![alt tag](https://github.com/nimran/Amazon-S3-Integration-in-Android/blob/master/images/cognito%20pool%20id.png)
+   
 
     Thats it, you are done :) Let's move onto Android
 
@@ -89,26 +81,25 @@ Following are covered in this repo/tutorial/example
 
         Goto Manifest and add Transfer Service
 
-        **<service
+        <service
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
-            android:enabled="true" />**
+            android:enabled="true" />
 
 
      d) Initialize Credential Provider
 
-        **new CognitoCachingCredentialsProvider(
-                            context,
-                            AWSKeys.COGNITO_POOL_ID, // Identity Pool ID
-                            Regions.US_EAST_1 // Region
-                    )**
+        credProvider = CognitoCachingCredentialsProvider(
+                    context,
+                    AWSKeys.COGNITO_POOL_ID,  // Identity Pool ID
+                    AWSKeys.MY_REGION // Region
 
      e) Set Amazon client
 
-        **sS3Client = new AmazonS3Client(getCredProvider(context));
-                    sS3Client.setRegion(Region.getRegion(Regions.US_EAST_1));**
+       amzonS3Client = AmazonS3Client(getCredProvider(context),Region.getRegion(AWSKeys.MY_REGION))
+          
 
 
-     f) Configure your keys in AWSKEYS.java before running the application
+     f) Configure your keys in **AWSKEYS.java** before running the application
 
      g) Set file to upload
 
@@ -155,53 +146,35 @@ Following are covered in this repo/tutorial/example
 
     Let us create presignedurl
 
-    ResponseHeaderOverrides overrideHeader = new ResponseHeaderOverrides();
-    overrideHeader.setContentType("image/jpeg");
-    String mediaUrl = f.getName();
-    GeneratePresignedUrlRequest generatePresignedUrlRequest =
-            new GeneratePresignedUrlRequest(AWSKeys.BUCKET_NAME, mediaUrl);
-    generatePresignedUrlRequest.setMethod(HttpMethod.GET); // Default.
-    generatePresignedUrlRequest.setExpiration(expiration);
-    generatePresignedUrlRequest.setResponseHeaders(overrideHeader);
-
-
+        val overrideHeader = ResponseHeaderOverrides()
+        overrideHeader.contentType = getMimeType(path)
+        val mediaUrl = f.name
+        val generatePresignedUrlRequest = GeneratePresignedUrlRequest(study.amazons3integration.aws.AWSKeys.BUCKET_NAME, mediaUrl)
+        generatePresignedUrlRequest.method = HttpMethod.GET // Default.
+        generatePresignedUrlRequest.expiration = expiration
+        generatePresignedUrlRequest.responseHeaders = overrideHeader
+        val url = s3client.generatePresignedUrl(generatePresignedUrlRequest)
 
     * Full Code *
-    public static String generates3ShareUrl(Context applicationContext, String path) {
-            String EXPIRY_DATE = "Jan 1, 2037"; // gave for ~20 years
-
-            File f = new File(path);
-            AmazonS3 s3client = AmazonUtil.getS3Client(applicationContext);
-
-            Date expiration = new Date();
-            long msec = expiration.getTime();
-            msec += 1000 * 6000 * 6000; // 1 hour.
-            Date d = new Date();
-            DateFormat format = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
-            Date date = null;
-            try {
-                date = format.parse(EXPIRY_DATE);
-                expiration.setTime(date.getTime());
-            } catch (ParseException e) {
-                e.printStackTrace();
-                expiration.setTime(msec);
+    
+            fun generates3ShareUrl(applicationContext: Context?, path: String?): String {
+            val f = File(path)
+            val s3client: AmazonS3 = AmazonUtil.getS3Client(applicationContext)!!
+            val expiration = Date()
+            var msec = expiration.time
+            msec += 1000 * 60 * 60.toLong() // 1 hour.
+            expiration.time = msec
+            val overrideHeader = ResponseHeaderOverrides()
+            overrideHeader.contentType = getMimeType(path)
+            val mediaUrl = f.name
+            val generatePresignedUrlRequest = GeneratePresignedUrlRequest(study.amazons3integration.aws.AWSKeys.BUCKET_NAME, mediaUrl)
+            generatePresignedUrlRequest.method = HttpMethod.GET // Default.
+            generatePresignedUrlRequest.expiration = expiration
+            generatePresignedUrlRequest.responseHeaders = overrideHeader
+            val url = s3client.generatePresignedUrl(generatePresignedUrlRequest)
+            Log.e("Generated Url - ", url.toString())
+            return url.toString()
             }
-            System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
-
-
-            ResponseHeaderOverrides overrideHeader = new ResponseHeaderOverrides();
-            overrideHeader.setContentType("image/jpeg");
-            String mediaUrl = f.getName();
-            GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(AWSKeys.BUCKET_NAME, mediaUrl);
-            generatePresignedUrlRequest.setMethod(HttpMethod.GET); // Default.
-            generatePresignedUrlRequest.setExpiration(expiration);
-            generatePresignedUrlRequest.setResponseHeaders(overrideHeader);
-
-            URL url = s3client.generatePresignedUrl(generatePresignedUrlRequest);
-            Log.e("s", url.toString());
-            return url.toString();
-        }
 
     ![alt tag](https://raw.githubusercontent.com/nimran/Amazon-S3-Integration-in-Android/master/images/android-log.png)
 
