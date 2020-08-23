@@ -69,11 +69,12 @@ Following are covered in this repo/tutorial/example
 4) **Getting started with Android integration**
 
     a) Get the AWS Mobile SDK for Android
-    dependencies {
-        compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
+    	
+        dependencies {
+        	compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
             compile 'com.amazonaws:aws-android-sdk-cognito:2.2.+'
             compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.2.+'
-    }
+    	}
 
     b) set the necessary manifest permissons like Internet
 
@@ -100,7 +101,13 @@ Following are covered in this repo/tutorial/example
 
 
      f) Configure your keys in **AWSKEYS.java** before running the application
-
+     	
+        object AWSKeys {
+            internal const val COGNITO_POOL_ID = "YOUR COGNITO POOL ID"
+            internal val MY_REGION = Regions.AP_SOUTHEAST_1 // WHAT EVER REGION IT MAY BE, 			PLEASE CHOOSE EXACT
+            const val BUCKET_NAME = "YOUR BUCKET"
+          }
+        
      g) Set file to upload
 
         File file = new File(filePath);
