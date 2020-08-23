@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AmazonS3Integration.iml" filepath="$PROJECT_DIR$/AmazonS3Integration.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Amazon-S3-Integration.iml" filepath="$PROJECT_DIR$/.idea/Amazon-S3-Integration.iml" group="Amazon-S3-Integration" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="Amazon-S3-Integration/app" />
     </modules>
   </component>
 </project>
